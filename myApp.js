@@ -66,36 +66,86 @@ const findOneByFood = (food, done) => {
 
 
 const findPersonById = (personId, done) => {
-  done(null /*, data*/);
+  Person.findById(personId, (err, data) => {
+    if (err) {
+      return done(err); // Pass the error to the callback
+    }
+    done(null, data); // Pass the found document to the callback
+  });
 };
+
 
 const findEditThenSave = (personId, done) => {
-  const foodToAdd = "hamburger";
+  Person.findById(personId, (err, person) => {
+    if (err) {
+      return done(err); // Handle error if person not found
+    }
 
-  done(null /*, data*/);
+    // Add "hamburger" to the favoriteFoods array
+    person.favoriteFoods.push("hamburger");
+
+    // Save the updated person document
+    person.save((err, updatedPerson) => {
+      if (err) {
+        return done(err); // Handle error while saving
+      }
+      done(null, updatedPerson); // Pass the updated document to the callback
+    });
+  });
 };
+
 
 const findAndUpdate = (personName, done) => {
-  const ageToSet = 20;
-
-  done(null /*, data*/);
+  Person.findOneAndUpdate(
+    { name: personName }, // Search by name
+    { age: 20 },          // Update the age to 20
+    { new: true },        // Return the updated document
+    (err, updatedPerson) => {
+      if (err) {
+        return done(err); // Handle error if something goes wrong
+      }
+      done(null, updatedPerson); // Pass the updated document to the callback
+    }
+  );
 };
 
+
 const removeById = (personId, done) => {
-  done(null /*, data*/);
+  Person.findByIdAndRemove(personId, (err, deletedPerson) => {
+    if (err) {
+      return done(err); // Handle error if something goes wrong
+    }
+    done(null, deletedPerson); // Return the removed document (if any)
+  });
 };
 
 const removeManyPeople = (done) => {
-  const nameToRemove = "Mary";
-
-  done(null /*, data*/);
+  const nameToRemove = "Mary"; // This can be any name you wish to remove
+  Person.remove({ name: nameToRemove }, (err, result) => {
+    if (err) {
+      return done(err); // Handle any error
+    }
+    done(null, result); // Return the result object containing the outcome of the operation
+  });
 };
+
 
 const queryChain = (done) => {
-  const foodToSearch = "burrito";
+  const foodToSearch = "burrito"; // Specify the food to search for
 
-  done(null /*, data*/);
+  // Create the query with method chaining
+  Person.find({ favoriteFoods: foodToSearch })  // Find people who like the specified food
+    .sort({ name: 1 })                          // Sort by name in ascending order
+    .limit(2)                                   // Limit to 2 results
+    .select('-age')                             // Exclude the age field from the results
+    .exec((err, data) => {                      // Execute the query and pass the callback
+      if (err) {
+        return done(err);                        // Handle error
+      }
+      done(null, data);                          // Return the result (array of people)
+    });
 };
+
 
 /** **Well Done !!**
 /* You completed these challenges, let's go celebrate !
