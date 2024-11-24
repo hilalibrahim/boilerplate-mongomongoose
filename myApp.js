@@ -1,23 +1,69 @@
 require('dotenv').config();
+const mongoose = require('mongoose')
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+const personSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true, // Name is required
+    trim: true, // Removes unnecessary whitespace
+  },
+  age: {
+    type: Number,
+    min: 0, // Age cannot be negative
+  },
+  favoriteFoods: {
+    type: [String], // Array of strings
+    default: [], // Default to an empty array if not provided
+  },
+});
+let Person = mongoose.model('Person', personSchema);
 
-
-let Person;
+const arrayOfPeople = [
+  { name: 'Alice', age: 28, favoriteFoods: ['salad', 'steak'] },
+  { name: 'Bob', age: 35, favoriteFoods: ['pizza', 'pasta'] },
+  { name: 'Charlie', age: 22, favoriteFoods: ['chocolate', 'sushi'] },
+];
 
 const createAndSavePerson = (done) => {
-  done(null /*, data*/);
+  // Create a new person instance
+  const person = new Person({
+    name: "John Doe", // Example name
+    age: 25, // Example age
+    favoriteFoods: ["pizza", "pasta", "ice cream"], // Example favorite foods
+  });
+
+  // Save the instance to the database
+  person.save((err, data) => {
+    if (err) return done(err); // Pass the error to the callback
+    done(null, data); // Pass the saved document to the callback
+  });
 };
 
 const createManyPeople = (arrayOfPeople, done) => {
-  done(null /*, data*/);
+  // Use Model.create() to save an array of people
+  Person.create(arrayOfPeople, (err, data) => {
+    if (err) return done(err); // Pass the error to the callback
+    done(null, data); // Pass the created documents to the callback
+  });
 };
 
+
 const findPeopleByName = (personName, done) => {
-  done(null /*, data*/);
+  // Use Model.find() to search for all people with the given name
+  Person.find({ name: personName }, (err, data) => {
+    if (err) return done(err); // Pass the error to the callback
+    done(null, data); // Pass the found documents to the callback
+  });
 };
 
 const findOneByFood = (food, done) => {
-  done(null /*, data*/);
+  // Use Model.findOne() to find one person with the given favorite food
+  Person.findOne({ favoriteFoods: food }, (err, data) => {
+    if (err) return done(err); // Pass the error to the callback
+    done(null, data); // Pass the found document to the callback
+  });
 };
+
 
 const findPersonById = (personId, done) => {
   done(null /*, data*/);
